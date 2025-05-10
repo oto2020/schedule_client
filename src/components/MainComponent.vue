@@ -47,7 +47,7 @@
         </div>
 
         <div name="Выбор режима просмотра полный средний или минимальный modes" class="filter-block m-1">
-          <div class="filter-title">Режим просмотра</div>
+          <div class="filter-title">Режим отображения строк</div>
           <div>
             <button v-for="mode in modes" :key="mode" type="button"
               :class="{ 'filter-button btn active m-1': mode.isActive, 'filter-button btn m-1': !mode.isActive }"
@@ -74,7 +74,7 @@
         </div>
 
         <div name="Выбор частей недели weekParts" class="filter-block m-1">
-          <div class="filter-title">Выбор дней</div>
+          <div class="filter-title">Выбор дней недели</div>
           <div>
             <button v-for="wp in weekParts" :key="wp" type="button"
               :class="{ 'filter-button btn active m-1': wp.isActive, 'filter-button btn m-1': !wp.isActive }"
@@ -196,7 +196,7 @@
           </tbody>
         </table>
 
-        <!-- Таблица для режима s -->
+        <!-- Таблица для режима s
         <table v-if="computedModeValue === 's'" class="table table-bordered line-height-1-2 mb-4">
           <thead>
             <tr>
@@ -227,7 +227,7 @@
               </td>
             </tr>
           </tbody>
-        </table>
+        </table> -->
 
 
 
@@ -273,9 +273,9 @@ export default {
         { title: 'Бесплатные', val: 'non-commercial', isActive: false, icon: 'fa-gift' },
       ],
       modes: [
-        { title: 'Полный', val: 'l', isActive: true, icon: 'expand' },
-        { title: 'Средний', val: 'm', isActive: false, icon: 'compress' },
-        { title: 'Минимум', val: 's', isActive: false, icon: 'compress-arrows-alt' },
+        { title: 'Все часы', val: 'l', isActive: true, icon: 'expand' },
+        { title: 'Минимум', val: 'm', isActive: false, icon: 'compress' },
+        // { title: 'Минимум', val: 's', isActive: false, icon: 'compress-arrows-alt' },
       ],
 
       weekParts: [
@@ -543,8 +543,6 @@ export default {
         filteredSchedule = filteredSchedule.filter(el => allowedDays.includes(Number(el.dayOfWeekNumber)));
       }
 
-
-
       // обнуляем данные таблицы
       this.scheduleData = [];
       if (this.computedModeValue === 'l') {
@@ -584,54 +582,76 @@ export default {
       if (this.computedModeValue === 'm') {
         let result = {};
 
-        filteredSchedule.forEach(item => {
-          const hour = item.hour;
-          const day = item.dayOfWeek;
+        // Парсим допустимые дни недели из computedWeekPartValue
+        const allowedDayNumbers = this.computedWeekPartValue
+          .split(',')
+          .map(str => str.trim())
+          .filter(str => str !== '')
+          .map(Number);
 
-          if (!result[hour]) {
-            result[hour] = {};
+        const allowedDays = allowedDayNumbers.map(num => this.weekDays[num]);
+
+        // Определяем, какие из этих дней реально используются
+        const usedDays = new Set(
+          filteredSchedule
+            .map(el => el.dayOfWeek)
+            .filter(day => allowedDays.includes(day))
+        );
+
+        for (let hour = 7; hour <= 22; hour++) {
+          const row = {};
+          let hasAnyEntry = false;
+
+          usedDays.forEach(day => {
+            const entries = filteredSchedule.filter(
+              item => item.hour === hour && item.dayOfWeek === day
+            );
+            if (entries.length > 0) {
+              row[day] = entries;
+              hasAnyEntry = true;
+            } else {
+              row[day] = null;
+            }
+          });
+
+          // Добавляем строку только если есть хотя бы одно занятие в этом часу
+          if (hasAnyEntry) {
+            result[hour] = row;
           }
-
-          if (!result[hour][day]) {
-            result[hour][day] = [];
-          }
-
-          result[hour][day].push(item);
-        });
+        }
 
         this.scheduleData = result;
       }
 
 
+      // // режим просмотра: самый компактный small
+      // if (this.computedModeValue === 's') {
 
-      // режим просмотра: самый компактный small
-      if (this.computedModeValue === 's') {
+      //   filteredSchedule = filteredSchedule
+      //     .sort((a, b) => a.hour - b.hour)
+      //     .sort((a, b) => a.exerciseTitle - b.exerciseTitle);
+      //   let result = {};
 
-        filteredSchedule = filteredSchedule
-          .sort((a, b) => a.hour - b.hour)
-          .sort((a, b) => a.exerciseTitle - b.exerciseTitle);
-        let result = {};
-
-        // у каждого дня недели свой номер столбца
-        let dayOfWeekArray = this.weekDays.map(el => { return { title: el, row: 0 }; });
-        console.log(dayOfWeekArray);
-        // пробегаемся по всем элементам расписания и закидываем их в соответствующую ячейку, после чего column++
-        filteredSchedule.forEach(exercise => {
-          // День недели из преобразованного массива dayOfWeekArray в соответствии с перебираемым занятием
-          let currentDayOfWeekElem = dayOfWeekArray.find(el => el.title === exercise.dayOfWeek);
-          let currentDayOfWeekElemIndex = dayOfWeekArray.findIndex(el => el.title === exercise.dayOfWeek);
-          if (!result[currentDayOfWeekElem.row]) {
-            result[currentDayOfWeekElem.row] = [];
-          }
-          if (!result[currentDayOfWeekElem.row][currentDayOfWeekElemIndex]) {
-            result[currentDayOfWeekElem.row][currentDayOfWeekElemIndex] = [];
-          }
-          result[currentDayOfWeekElem.row][currentDayOfWeekElemIndex].push(exercise);
-          console.log(`${currentDayOfWeekElem.row}, ${currentDayOfWeekElemIndex}: ${exercise}`)
-          currentDayOfWeekElem.row++;
-        })
-        this.scheduleData = result;
-      }
+      //   // у каждого дня недели свой номер столбца
+      //   let dayOfWeekArray = this.weekDays.map(el => { return { title: el, row: 0 }; });
+      //   console.log(dayOfWeekArray);
+      //   // пробегаемся по всем элементам расписания и закидываем их в соответствующую ячейку, после чего column++
+      //   filteredSchedule.forEach(exercise => {
+      //     // День недели из преобразованного массива dayOfWeekArray в соответствии с перебираемым занятием
+      //     let currentDayOfWeekElem = dayOfWeekArray.find(el => el.title === exercise.dayOfWeek);
+      //     let currentDayOfWeekElemIndex = dayOfWeekArray.findIndex(el => el.title === exercise.dayOfWeek);
+      //     if (!result[currentDayOfWeekElem.row]) {
+      //       result[currentDayOfWeekElem.row] = [];
+      //     }
+      //     if (!result[currentDayOfWeekElem.row][currentDayOfWeekElemIndex]) {
+      //       result[currentDayOfWeekElem.row][currentDayOfWeekElemIndex] = [];
+      //     }
+      //     result[currentDayOfWeekElem.row][currentDayOfWeekElemIndex].push(exercise);
+      //     console.log(`${currentDayOfWeekElem.row}, ${currentDayOfWeekElemIndex}: ${exercise}`)
+      //     currentDayOfWeekElem.row++;
+      //   })
+      //   this.scheduleData = result;
+      // }
 
 
 
