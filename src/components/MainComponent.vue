@@ -546,41 +546,62 @@ export default {
 
       // обнуляем данные таблицы
       this.scheduleData = [];
-      if (this.computedModeValue === 'l' || this.computedModeValue === 'm') {
-
-        // временная переменная-объект со структурой таблицы
-        // строки: hour
-        // столбцы: dayWeeks
-        // ячейки: DayData
+      if (this.computedModeValue === 'l') {
         let result = {};
 
-        // для этого режима проставляем все часы от 7 до 22
-        if (this.computedModeValue === 'l') {
-          for (let i = 7; i <= 22; i++) {
-            result[i] = null;
-          }
+        // Парсим допустимые дни недели из computedWeekPartValue
+        const allowedDayNumbers = this.computedWeekPartValue
+          .split(',')
+          .map(str => str.trim())
+          .filter(str => str !== '')
+          .map(Number); // например: [0, 1, 2]
+
+        const allowedDays = allowedDayNumbers.map(num => this.weekDays[num]);
+
+        // Определяем, какие из этих дней реально используются
+        const usedDays = new Set(
+          filteredSchedule
+            .map(el => el.dayOfWeek)
+            .filter(day => allowedDays.includes(day))
+        );
+
+        // Инициализируем строки от 7 до 22
+        for (let hour = 7; hour <= 22; hour++) {
+          result[hour] = {};
+          usedDays.forEach(day => {
+            const entries = filteredSchedule.filter(
+              item => item.hour === hour && item.dayOfWeek === day
+            );
+            result[hour][day] = entries.length > 0 ? entries : null;
+          });
         }
-
-
-        filteredSchedule.forEach(item => {
-          const dayOfWeek = item.dayOfWeek;
-          const hour = item.hour;
-
-          // Создаем уровни вложенности при необходимости
-          result[hour] = result[hour] || {};
-
-          // Заполняем массивы от пн до вс
-          this.weekDays.forEach(dayOfWeek => {
-            result[hour][dayOfWeek] = result[hour][dayOfWeek] || [];
-          })
-
-          // Добавляем занятие в соответствующий уровень
-          result[hour][dayOfWeek].push(item);
-        });
-
 
         this.scheduleData = result;
       }
+
+
+      if (this.computedModeValue === 'm') {
+        let result = {};
+
+        filteredSchedule.forEach(item => {
+          const hour = item.hour;
+          const day = item.dayOfWeek;
+
+          if (!result[hour]) {
+            result[hour] = {};
+          }
+
+          if (!result[hour][day]) {
+            result[hour][day] = [];
+          }
+
+          result[hour][day].push(item);
+        });
+
+        this.scheduleData = result;
+      }
+
+
 
       // режим просмотра: самый компактный small
       if (this.computedModeValue === 's') {
