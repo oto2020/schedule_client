@@ -128,33 +128,32 @@
 
         </div>
 
-        <table class="table table-bordered line-height-1-2 mb-4">
+        <!-- Таблица для режима l -->
+        <table v-if="computedModeValue === 'l'" class="table table-bordered line-height-1-2 mb-4">
           <thead>
             <tr>
-              <th v-if="computedModeValue !== 's'" class="col-md-1">Часы</th>
-              <th v-for="(day, index) in weekDays" :key="index" class="col-md-1">{{ day }}</th>
+              <th class="col-md-1">Часы</th>
+              <th v-for="(day, index) in computedActiveWeekDays" :key="index" class="col-md-1">{{ day }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(hourData, hour) in scheduleData" :key="hour">
-              <!-- один столбец с часами от 7 до 23 -->
-              <td v-if="computedModeValue !== 's'">{{ hour }}</td>
-              <!-- остальные столбцы с днями недели от понедельника до воскресения -->
+              <td>{{ hour }}</td>
               <td v-for="(dayData, day) in hourData" :key="day" class="td-container">
                 <div v-if="dayData" class="inner-div">
                   <div v-for="l in dayData" :key="l">
-                    <div class="lesson-parent m-1" :style="{ 'border': '1px solid ' + l.backgroundColor }">
+                    <div class="lesson-parent m-1" :style="{ border: '1px solid ' + l.backgroundColor }">
                       <div>
                         <div class="exercise-title">{{ l.exerciseTitle }}</div>
                         <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
                         <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div>
                         <div class="room-title">{{ l.roomTitle }}</div>
+                        <div class="room-title">{{ l.dayOfWeek }}</div>
                       </div>
                       <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
-                      <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon"><font-awesome-icon
-                          :icon="['fas', 'ruble-sign']" size="sm" /></div>
-
-
+                      <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
+                        <font-awesome-icon :icon="['fas', 'ruble-sign']" size="sm" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -162,6 +161,74 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Таблица для режима m -->
+        <table v-if="computedModeValue === 'm'" class="table table-bordered line-height-1-2 mb-4">
+          <thead>
+            <tr>
+              <th class="col-md-1">Часы</th>
+              <th v-for="(day, index) in weekDays" :key="index" class="col-md-1">{{ day }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(hourData, hour) in scheduleData" :key="hour">
+              <td>{{ hour }}</td>
+              <td v-for="(dayData, day) in hourData" :key="day" class="td-container">
+                <div v-if="dayData" class="inner-div">
+                  <div v-for="l in dayData" :key="l">
+                    <div class="lesson-parent m-1" :style="{ border: '1px solid ' + l.backgroundColor }">
+                      <div>
+                        <div class="exercise-title">{{ l.exerciseTitle }}</div>
+                        <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
+                        <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div>
+                        <div class="room-title">{{ l.roomTitle }}</div>
+                        <div class="room-title">{{ l.dayOfWeek }}</div>
+                      </div>
+                      <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
+                      <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
+                        <font-awesome-icon :icon="['fas', 'ruble-sign']" size="sm" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Таблица для режима s -->
+        <table v-if="computedModeValue === 's'" class="table table-bordered line-height-1-2 mb-4">
+          <thead>
+            <tr>
+              <th v-for="(day, index) in weekDays" :key="index" class="col-md-1">{{ day }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(hourData, hour) in scheduleData" :key="hour">
+              <td v-for="(dayData, day) in hourData" :key="day" class="td-container">
+                <div v-if="dayData" class="inner-div">
+                  <div v-for="l in dayData" :key="l">
+                    <div class="lesson-parent m-1" :style="{ border: '1px solid ' + l.backgroundColor }">
+                      <div>
+                        <div class="exercise-title">{{ l.exerciseTitle }}</div>
+                        <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
+                        <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div>
+                        <div class="room-title">{{ l.roomTitle }}</div>
+                        <div class="room-title">{{ l.dayOfWeek }}</div>
+                      </div>
+                      <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
+                      <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
+                        <font-awesome-icon :icon="['fas', 'ruble-sign']" size="sm" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+
 
 
 
@@ -205,15 +272,15 @@ export default {
         { title: 'Бесплатные', val: 'non-commercial', isActive: false, icon: 'fa-gift' },
       ],
       modes: [
-        { title: 'Полный', val: 'l', isActive: false, icon: 'expand' },
+        { title: 'Полный', val: 'l', isActive: true, icon: 'expand' },
         { title: 'Средний', val: 'm', isActive: false, icon: 'compress' },
-        { title: 'Минимум', val: 's', isActive: true, icon: 'compress-arrows-alt' },
+        { title: 'Минимум', val: 's', isActive: false, icon: 'compress-arrows-alt' },
       ],
 
       weekParts: [
         { title: 'Пн, Вт', icon: 'calendar', val: '0,1', isActive: false },
         { title: 'Ср, Чт', icon: 'calendar', val: '2,3', isActive: false },
-        { title: 'Пт, Сб, Вс', icon: 'calendar', val: '4,5,6,', isActive: false },
+        { title: 'Пт, Сб, Вс', icon: 'calendar', val: '4,5,6', isActive: false },
         { title: 'Вся неделя', icon: 'calendar', val: '0,1,2,3,4,5,6', isActive: true },
       ],
       schedule: [],
@@ -333,6 +400,27 @@ export default {
     // кнопка переключения частей недели
     computedWeekPartValue() {
       return this.weekParts.find((wp) => wp.isActive).val;
+    },
+    computedActiveWeekDays() {
+      // Получим список уникальных номеров дней недели, у которых есть занятия
+      const activeDays = new Set();
+
+      Object.values(this.scheduleData).forEach(hourRow => {
+        if (hourRow && typeof hourRow === 'object') {
+          Object.entries(hourRow).forEach(([, lessons]) => {
+            if (lessons && lessons.length > 0) {
+              lessons.forEach(lesson => {
+                if (lesson.dayOfWeekNumber !== undefined) {
+                  activeDays.add(lesson.dayOfWeekNumber);
+                }
+              });
+            }
+          });
+        }
+      });
+
+      // Преобразуем номера дней обратно в имена из weekDays
+      return this.weekDays.filter((_, index) => activeDays.has(index));
     }
   },
   methods: {
@@ -442,6 +530,18 @@ export default {
       if (this.computedKidValue === 'non-kid') {
         filteredSchedule = filteredSchedule.filter(el => !el.exerciseTitle.includes('KIDS'));
       }
+
+      // Фильтрация по дням недели
+      if (this.computedWeekPartValue) {
+        const allowedDays = this.computedWeekPartValue
+          .split(',')
+          .map(str => str.trim())
+          .filter(str => str !== '')
+          .map(Number); // получаем массив чисел, например [0, 1, 2]
+
+        filteredSchedule = filteredSchedule.filter(el => allowedDays.includes(Number(el.dayOfWeekNumber)));
+      }
+
 
 
       // обнуляем данные таблицы
