@@ -1,4 +1,4 @@
-/* eslint-disable */ 
+/* eslint-disable */
 <template>
   <div class="">
 
@@ -11,7 +11,6 @@
             <div class="list-group">
               <button type="button" v-for="(item, index) in section.rooms" :key="index"
                 :class="{ 'room-button list-group-item list-group-item-action active': item.isActive, 'room-button list-group-item list-group-item-action': !item.isActive }"
-                
                 @click="handleRoomButtonClick(item)">
                 <font-awesome-icon v-if="item.isActive" :icon="['far', 'check-square']" />
                 <font-awesome-icon v-if="!item.isActive" :icon="['far', 'square']" />
@@ -28,12 +27,13 @@
           </button> -->
 
         </div>
+
+
       </div>
 
 
       <div class="d-flex flex-wrap">
-        <div name="Выбор коммерческого или бесплатного занятия commercials"
-          class="filter-block m-1">
+        <div name="Выбор коммерческого или бесплатного занятия commercials" class="filter-block m-1">
           <div class="filter-title">По стоимости</div>
           <div class="">
             <button v-for="commercial in commercials" :key="commercial" type="button"
@@ -46,8 +46,7 @@
           </div>
         </div>
 
-        <div name="Выбор режима просмотра полный средний или минимальный modes"
-          class="filter-block m-1">
+        <div name="Выбор режима просмотра полный средний или минимальный modes" class="filter-block m-1">
           <div class="filter-title">Режим просмотра</div>
           <div>
             <button v-for="mode in modes" :key="mode" type="button"
@@ -73,10 +72,27 @@
             </button>
           </div>
         </div>
-      
+
+        <div name="Выбор частей недели weekParts" class="filter-block m-1">
+          <div class="filter-title">Выбор дней</div>
+          <div>
+            <button v-for="wp in weekParts" :key="wp" type="button"
+              :class="{ 'filter-button btn active m-1': wp.isActive, 'filter-button btn m-1': !wp.isActive }"
+              @click="handleWeekPartButtonClick(wp.val)">
+              <font-awesome-icon :icon="['fas', wp.icon]" />
+              <br>
+              {{ wp.title }}
+            </button>
+          </div>
+        </div>
+
       </div>
-      <div class="m-2 d-inline-block">Отступ справа при печати: <input v-model="paddingRightPercent" style="width: 60px; margin-right:4px;">%</div>
-      <button @click="generatePDF()">Гнерировать PDF A4 альбом с заданным отступом справа под наши уникальные неформальные рамки с отступом {{ paddingRightPercent }}%</button>
+
+
+      <div class="m-2 d-inline-block">Отступ справа при печати: <input v-model="paddingRightPercent"
+          style="width: 60px; margin-right:4px;">%</div>
+      <button @click="generatePDF()">Гнерировать PDF A4 альбом с заданным отступом справа под наши уникальные
+        неформальные рамки с отступом {{ paddingRightPercent }}%</button>
     </div>
 
     <div name="Печатаемый контент" id="printingContent" v-if="fontSizeVW">
@@ -84,17 +100,17 @@
 
         <div class="w-100 fs-4 d-flex pl-4 mt-4">
 
-          <button type="button" class="btn btn-outline-secondary" @click="weekNumberDecrementButtonClick"><font-awesome-icon
-              :icon="['fas', 'fa-chevron-left']" /></button>
+          <button type="button" class="btn btn-outline-secondary"
+            @click="weekNumberDecrementButtonClick"><font-awesome-icon :icon="['fas', 'fa-chevron-left']" /></button>
           <div class="mx-2">{{ computedStartDate }} — {{ computedEndDate }}</div>
-          <button type="button" class="btn btn-outline-secondary" @click="weekNumberIncrementButtonClick"><font-awesome-icon
-              :icon="['fas', 'fa-chevron-right']" /></button>
+          <button type="button" class="btn btn-outline-secondary"
+            @click="weekNumberIncrementButtonClick"><font-awesome-icon :icon="['fas', 'fa-chevron-right']" /></button>
           <div name="Перечисление выбранных помещений" class="ml-2" style="margin-left: 10px;">
             {{ this.computedAllowedRoomTitles.join(', ') }}
           </div>
 
           <div class="ms-auto">
-            
+
             <!-- <button class="btn me-1" >
             <div v-if="fullScreenMode" class="full-screen-button" @click="toggleFullScreen(false)"> 
               <font-awesome-icon :icon="['fas', 'fa-compress']" />
@@ -104,10 +120,10 @@
             </div>
           </button> -->
 
-          <button class="btn" @click="toggleFullScreen(true)">
-            <img v-if="schedule" class="g1logo" :src="require('@/g1logo.png')" alt="Пример изображения">
-            <div  v-else class="mr-1"><font-awesome-icon icon="spinner" size="lg" spin /></div>
-          </button>
+            <button class="btn" @click="toggleFullScreen(true)">
+              <img v-if="schedule" class="g1logo" :src="require('@/g1logo.png')" alt="Пример изображения">
+              <div v-else class="mr-1"><font-awesome-icon icon="spinner" size="lg" spin /></div>
+            </button>
           </div>
 
         </div>
@@ -193,10 +209,17 @@ export default {
         { title: 'Средний', val: 'm', isActive: false, icon: 'compress' },
         { title: 'Минимум', val: 's', isActive: true, icon: 'compress-arrows-alt' },
       ],
+
+      weekParts: [
+        { title: 'Пн, Вт', icon: 'calendar', val: '0,1', isActive: false },
+        { title: 'Ср, Чт', icon: 'calendar', val: '2,3', isActive: false },
+        { title: 'Пт, Сб, Вс', icon: 'calendar', val: '4,5,6,', isActive: false },
+        { title: 'Вся неделя', icon: 'calendar', val: '0,1,2,3,4,5,6', isActive: true },
+      ],
       schedule: [],
       rooms: [],
       roomsSections: [
-      {
+        {
           "title": "ТЗ и студии",
           "icon": "tz",
           "rooms": [
@@ -306,6 +329,10 @@ export default {
     // кнопка переключения режимов платные/бесплатные/неважно
     computedCommercialValue() {
       return this.commercials.find((commercial) => commercial.isActive).val;
+    },
+    // кнопка переключения частей недели
+    computedWeekPartValue() {
+      return this.weekParts.find((wp) => wp.isActive).val;
     }
   },
   methods: {
@@ -524,6 +551,12 @@ export default {
       this.applySettings();
     },
 
+    // изменение выбора части недели
+    handleWeekPartButtonClick(wpVal) {
+      this.weekParts.forEach(wp => wp.isActive = wp.val == wpVal);
+      this.applySettings();
+    },
+
     // генерирование ПДФ-файла
     async generatePDF() {
       // this.fontSizeVW = '2rem';
@@ -539,10 +572,10 @@ export default {
       const a4AspectRatio = A4_WIDTH / A4_HEIGHT;
       // Новая ширина
 
-      
+
       const newWidthPrintingContent = printingContent.offsetHeight * a4AspectRatio;
       // Устанавливаем новые размеры div
-      if (newWidthPrintingContent > oldWidthPrintingContent) 
+      if (newWidthPrintingContent > oldWidthPrintingContent)
         printingContent.style.width = newWidthPrintingContent + 'px';
 
       // устанавливаем новые размеры для того, чтобы справа сформировался отступ:
@@ -572,7 +605,7 @@ export default {
 
       contentCenter.style.width = oldWidthPrintingContent + 'px';
       contentRight.style.width = '0 px';
-      
+
       // this.fontSizeVW = '1rem';
     },
 
@@ -593,7 +626,7 @@ export default {
       }
 
     }
-    
+
   },
 
   props: {
@@ -603,58 +636,69 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  
 #contentCenter {
-  padding:2px;
+  padding: 2px;
   border-right: 1px dashed rgb(131, 130, 130);
 }
+
 .full-screen-button {
   -webkit-transition: all 0.3s ease;
-    -o-transition: all 0.3s ease;
-    transition: all 0.3s ease;
-    height: 27px;
-    width: 27px;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  height: 27px;
+  width: 27px;
 }
+
 .g1logo {
-    -webkit-transition: all 0.3s ease;
-    -o-transition: all 0.3s ease;
-    transition: all 0.3s ease;
-    height: 27px;
-    width: 100px;
+  -webkit-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  height: 27px;
+  width: 100px;
 }
+
 .room-button {
   padding: 5px;
   font-size: 11pt;
 }
 
 button {
-  
-  border-radius:0;
+
+  border-radius: 0;
   font-weight: bold;
   border-color: #f33;
-  color: #333; /* Цвет текста для активного состояния */
+  color: #333;
+  /* Цвет текста для активного состояния */
   border: 1px solid #f33;
 }
+
 button.active,
 button:hover {
   font-weight: bold;
-  transition: background-color 0.3s ease; /* Плавное изменение цвета за 0.3 секунды с эффектом ease-in-out */
-  background-color: #f33; /* Замените 'your_custom_color' на свой цвет */
+  transition: background-color 0.3s ease;
+  /* Плавное изменение цвета за 0.3 секунды с эффектом ease-in-out */
+  background-color: #f33;
+  /* Замените 'your_custom_color' на свой цвет */
   border-color: #333;
-  color: #fff; /* Цвет текста для активного состояния */
+  color: #fff;
+  /* Цвет текста для активного состояния */
 }
+
 .list-group {
-  
-  border-radius:0;
+
+  border-radius: 0;
 }
 
 .list-group-item:hover,
 .list-group-item.active {
   font-weight: bold;
-  transition: background-color 0.3s ease; /* Плавное изменение цвета за 0.3 секунды с эффектом ease-in-out */
-  background-color: #f33; /* Замените 'your_custom_color' на свой цвет */
+  transition: background-color 0.3s ease;
+  /* Плавное изменение цвета за 0.3 секунды с эффектом ease-in-out */
+  background-color: #f33;
+  /* Замените 'your_custom_color' на свой цвет */
   border-color: #333;
-  color: #fff; /* Цвет текста для активного состояния */
+  color: #fff;
+  /* Цвет текста для активного состояния */
 }
 
 
@@ -686,6 +730,7 @@ button:hover {
 .lesson-parent {
   font-size: v-bind(fontSizeVW);
 }
+
 .exercise-title {
   text-align: left;
   margin-left: 6px;
@@ -740,4 +785,5 @@ button:hover {
   height: 100%;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
-}</style>
+}
+</style>
