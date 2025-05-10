@@ -167,7 +167,7 @@
           <thead>
             <tr>
               <th class="col-md-1">Часы</th>
-              <th v-for="(day, index) in weekDays" :key="index" class="col-md-1">{{ day }}</th>
+              <th v-for="(day, index) in computedActiveWeekDays" :key="index" class="col-md-1">{{ day }}</th>
             </tr>
           </thead>
           <tbody>
@@ -200,7 +200,8 @@
         <table v-if="computedModeValue === 's'" class="table table-bordered line-height-1-2 mb-4">
           <thead>
             <tr>
-              <th v-for="(day, index) in weekDays" :key="index" class="col-md-1">{{ day }}</th>
+              <th class="col-md-1">Часы</th>
+              <th v-for="(day, index) in computedActiveWeekDays" :key="index" class="col-md-1">{{ day }}</th>
             </tr>
           </thead>
           <tbody>
