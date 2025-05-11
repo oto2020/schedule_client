@@ -129,41 +129,70 @@
         </div>
 
         <!-- Таблица для режима l -->
-        <table v-if="computedModeValue === 'l'" class="table table-bordered line-height-1-2 mb-4">
-          <thead>
+        <table v-if="computedModeValue === 'l'" class="table table-bordered line-height-1-2 mb-4"
+          style="table-layout: fixed; width: 100%;">
+
+          <thead class="head-separator">
+            <!-- Первая строка: дни недели -->
             <tr>
-              <th class="col-md-1">Часы</th>
-              <th v-for="(day, index) in computedActiveWeekDays" :key="index" class="col-md-1">{{ day }}</th>
+              <th rowspan="2" class="clock-column-style">
+                <font-awesome-icon :icon="['fas', 'clock']" size="sm" />
+              </th>
+              <th v-for="day in scheduleDays" :key="day" :colspan="scheduleRooms.length" class="text-center">
+                {{ day }}
+              </th>
+            </tr>
+            <!-- Вторая строка: помещения -->
+            <tr>
+              <template v-for="day in scheduleDays" :key="day">
+                <th v-for="(room, roomIndex) in scheduleRooms" :key="room" class="col-md-1 text-center " :class="[
+                  'col-md-1', 'text-center',
+                  (roomIndex === scheduleRooms.length - 1) ? 'day-separator' : '',
+                  'day-group-bg-' + (scheduleDays.indexOf(day) % 2)
+                ]">
+                  {{ room }}
+                </th>
+              </template>
             </tr>
           </thead>
+
           <tbody>
             <tr v-for="(hourData, hour) in scheduleData" :key="hour">
-              <td>{{ hour }}</td>
-              <td v-for="(dayData, day) in hourData" :key="day" class="td-container">
-                <div v-if="dayData" class="inner-div">
-                  <div v-for="l in dayData" :key="l">
-                    <div class="lesson-parent m-1" :style="{ border: '1px solid ' + l.backgroundColor }">
-                      <div>
-                        <div class="exercise-title">{{ l.exerciseTitle }}</div>
-                        <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
-                        <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div>
-                        <div class="room-title">{{ l.roomTitle }}</div>
-                        <div class="room-title">{{ l.dayOfWeek }}</div>
-                      </div>
-                      <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
-                      <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
-                        <font-awesome-icon :icon="['fas', 'ruble-sign']" size="sm" />
+              <td class="clock-column-style day-separator day-group-bg-1">
+                {{ hour }}
+              </td>
+              <template v-for="day in scheduleDays" :key="day">
+                <td v-for="(room, roomIndex) in scheduleRooms" :key="room" class="td-container" :class="[
+                  'td-container',
+                  (roomIndex === scheduleRooms.length - 1) ? 'day-separator' : '',
+                  'day-group-bg-' + (scheduleDays.indexOf(day) % 2)
+                ]">
+                  <div v-if="hourData[day] && hourData[day][room]" class="inner-div">
+                    <div v-for="l in hourData[day][room]" :key="l.id || l.startTime + l.exerciseTitle">
+                      <div class="lesson-parent m-1" :style="{ border: '1px solid ' + l.backgroundColor }">
+                        <div>
+                          <div class="exercise-title">{{ l.exerciseTitle }}</div>
+                          <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
+                          <!-- <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div> -->
+                          <div class="room-title">{{ l.roomTitle }}</div>
+                          <!-- <div class="room-title">{{ l.dayOfWeek }}</div> -->
+                        </div>
+                        <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
+                        <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
+                          <font-awesome-icon :icon="['fas', 'ruble-sign']" size="sm" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </td>
+                </td>
+              </template>
             </tr>
           </tbody>
         </table>
 
+
         <!-- Таблица для режима m -->
-        <table v-if="computedModeValue === 'm'" class="table table-bordered line-height-1-2 mb-4">
+        <!-- <table v-if="computedModeValue === 'm'" class="table table-bordered line-height-1-2 mb-4">
           <thead>
             <tr>
               <th class="col-md-1">Часы</th>
@@ -194,7 +223,7 @@
               </td>
             </tr>
           </tbody>
-        </table>
+        </table> -->
 
         <!-- Таблица для режима s
         <table v-if="computedModeValue === 's'" class="table table-bordered line-height-1-2 mb-4">
@@ -279,10 +308,10 @@ export default {
       ],
 
       weekParts: [
-        { title: 'Пн, Вт', icon: 'calendar', val: '0,1', isActive: false },
-        { title: 'Ср, Чт', icon: 'calendar', val: '2,3', isActive: false },
+        { title: 'Пн, Вт, Ср', icon: 'calendar', val: '0,1,2', isActive: false },
+        { title: 'Ср, Чт, Пт', icon: 'calendar', val: '2,3,4', isActive: true },
         { title: 'Пт, Сб, Вс', icon: 'calendar', val: '4,5,6', isActive: false },
-        { title: 'Вся неделя', icon: 'calendar', val: '0,1,2,3,4,5,6', isActive: true },
+        { title: 'Вся неделя', icon: 'calendar', val: '0,1,2,3,4,5,6', isActive: false },
       ],
       schedule: [],
       rooms: [],
@@ -293,7 +322,6 @@ export default {
           "rooms": [
             { "isActive": false, "title": "Тренажерный зал" },
             { "isActive": false, "title": "Студия пилатес" },
-            { "isActive": false, "title": "Студия йоги" },
           ]
         },
         {
@@ -317,6 +345,7 @@ export default {
           "icon": "cycle",
           "rooms": [
             { "isActive": false, "title": "Сайкл студия" },
+            { "isActive": false, "title": "Студия йоги" },
           ]
         },
         {
@@ -327,22 +356,22 @@ export default {
             { "isActive": false, "title": "Малый бассейн" },
           ]
         },
-        {
-          "title": "Спорт (дети)",
-          "icon": "gun1or-sport",
-          "rooms": [
-            { "isActive": false, "title": "Зал единоборств KIDS" },
-            { "isActive": false, "title": "Эстетический зал KIDS" }
-          ]
-        },
-        {
-          "title": "Интеллект и творчество (дети)",
-          "icon": "gun1or-intellect",
-          "rooms": [
-            { "isActive": false, "title": "Студия ИНТЕЛЛЕКТ KIDS" },
-            { "isActive": false, "title": "Студия КРЕАТИВ KIDS" },
-          ]
-        },
+        // {
+        //   "title": "Спорт (дети)",
+        //   "icon": "gun1or-sport",
+        //   "rooms": [
+        //     { "isActive": false, "title": "Зал единоборств KIDS" },
+        //     { "isActive": false, "title": "Эстетический зал KIDS" }
+        //   ]
+        // },
+        // {
+        //   "title": "Интеллект и творчество (дети)",
+        //   "icon": "gun1or-intellect",
+        //   "rooms": [
+        //     { "isActive": false, "title": "Студия ИНТЕЛЛЕКТ KIDS" },
+        //     { "isActive": false, "title": "Студия КРЕАТИВ KIDS" },
+        //   ]
+        // },
       ],
       scheduleData: reactive({}),
       testMode: false,
@@ -558,70 +587,82 @@ export default {
         const allowedDays = allowedDayNumbers.map(num => this.weekDays[num]);
 
         // Определяем, какие из этих дней реально используются
-        const usedDays = new Set(
+        const usedDays = [...new Set(
           filteredSchedule
             .map(el => el.dayOfWeek)
             .filter(day => allowedDays.includes(day))
-        );
+        )];
 
-        // Инициализируем строки от 7 до 22
+        // Определяем помещения, которые реально используются
+        const usedRooms = [...new Set(filteredSchedule.map(el => el.roomTitle))];
+
         for (let hour = 7; hour <= 22; hour++) {
           result[hour] = {};
+
           usedDays.forEach(day => {
-            const entries = filteredSchedule.filter(
-              item => item.hour === hour && item.dayOfWeek === day
-            );
-            result[hour][day] = entries.length > 0 ? entries : null;
+            if (!result[hour][day]) result[hour][day] = {};
+
+            usedRooms.forEach(room => {
+              const entries = filteredSchedule.filter(
+                item => item.hour === hour && item.dayOfWeek === day && item.roomTitle === room
+              );
+              result[hour][day][room] = entries.length > 0 ? entries : null;
+            });
           });
         }
+
+        // сохраняем отдельно используемые дни и помещения для шаблона
+        this.scheduleDays = usedDays;
+        this.scheduleRooms = usedRooms;
 
         this.scheduleData = result;
       }
 
 
-      if (this.computedModeValue === 'm') {
-        let result = {};
 
-        // Парсим допустимые дни недели из computedWeekPartValue
-        const allowedDayNumbers = this.computedWeekPartValue
-          .split(',')
-          .map(str => str.trim())
-          .filter(str => str !== '')
-          .map(Number);
+      // if (this.computedModeValue === 'm') {
+      //   let result = {};
 
-        const allowedDays = allowedDayNumbers.map(num => this.weekDays[num]);
+      //   // Парсим допустимые дни недели из computedWeekPartValue
+      //   const allowedDayNumbers = this.computedWeekPartValue
+      //     .split(',')
+      //     .map(str => str.trim())
+      //     .filter(str => str !== '')
+      //     .map(Number);
 
-        // Определяем, какие из этих дней реально используются
-        const usedDays = new Set(
-          filteredSchedule
-            .map(el => el.dayOfWeek)
-            .filter(day => allowedDays.includes(day))
-        );
+      //   const allowedDays = allowedDayNumbers.map(num => this.weekDays[num]);
 
-        for (let hour = 7; hour <= 22; hour++) {
-          const row = {};
-          let hasAnyEntry = false;
+      //   // Определяем, какие из этих дней реально используются
+      //   const usedDays = new Set(
+      //     filteredSchedule
+      //       .map(el => el.dayOfWeek)
+      //       .filter(day => allowedDays.includes(day))
+      //   );
 
-          usedDays.forEach(day => {
-            const entries = filteredSchedule.filter(
-              item => item.hour === hour && item.dayOfWeek === day
-            );
-            if (entries.length > 0) {
-              row[day] = entries;
-              hasAnyEntry = true;
-            } else {
-              row[day] = null;
-            }
-          });
+      //   for (let hour = 7; hour <= 22; hour++) {
+      //     const row = {};
+      //     let hasAnyEntry = false;
 
-          // Добавляем строку только если есть хотя бы одно занятие в этом часу
-          if (hasAnyEntry) {
-            result[hour] = row;
-          }
-        }
+      //     usedDays.forEach(day => {
+      //       const entries = filteredSchedule.filter(
+      //         item => item.hour === hour && item.dayOfWeek === day
+      //       );
+      //       if (entries.length > 0) {
+      //         row[day] = entries;
+      //         hasAnyEntry = true;
+      //       } else {
+      //         row[day] = null;
+      //       }
+      //     });
 
-        this.scheduleData = result;
-      }
+      //     // Добавляем строку только если есть хотя бы одно занятие в этом часу
+      //     if (hasAnyEntry) {
+      //       result[hour] = row;
+      //     }
+      //   }
+
+      //   this.scheduleData = result;
+      // }
 
 
       // // режим просмотра: самый компактный small
@@ -873,7 +914,9 @@ button:hover {
   font-size: v-bind(fontSizeVW);
 }
 
+
 .exercise-title {
+  font-size: 125%;
   text-align: left;
   margin-left: 6px;
   font-weight: bold;
@@ -912,7 +955,7 @@ button:hover {
   position: relative;
   border-radius: 10px;
   /* Закругление линии */
-  padding-left: 8px;
+  padding-left: 20px;
   padding-right: 3px;
   padding-top: 3px;
   padding-bottom: 3px;
@@ -923,9 +966,33 @@ button:hover {
   position: absolute;
   left: 0;
   top: 0;
-  width: 10px;
+  width: 20px;
   height: 100%;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 }
+
+.clock-column-style {
+  font-size: 30px;
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+}
+
+.day-group-bg-0 {
+  background-color: #ffffff;
+}
+
+.day-group-bg-1 {
+  background-color: #f5f5f5;
+}
+
+.day-separator {
+  border-right: 2px solid #a0a0a0;
+}
+
+.head-separator {
+  border-bottom: 2px solid #a0a0a0;
+}
+
 </style>
