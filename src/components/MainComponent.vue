@@ -577,24 +577,22 @@ export default {
       if (this.computedModeValue === 'l') {
         let result = {};
 
-        // Парсим допустимые дни недели из computedWeekPartValue
         const allowedDayNumbers = this.computedWeekPartValue
           .split(',')
           .map(str => str.trim())
           .filter(str => str !== '')
-          .map(Number); // например: [0, 1, 2]
+          .map(Number);
 
         const allowedDays = allowedDayNumbers.map(num => this.weekDays[num]);
 
-        // Определяем, какие из этих дней реально используются
         const usedDays = [...new Set(
           filteredSchedule
             .map(el => el.dayOfWeek)
             .filter(day => allowedDays.includes(day))
         )];
 
-        // Определяем помещения, которые реально используются
-        const usedRooms = [...new Set(filteredSchedule.map(el => el.roomTitle))];
+        // сортируем помещения по алфавиту
+        const usedRooms = [...new Set(filteredSchedule.map(el => el.roomTitle))].sort((a, b) => a.localeCompare(b));
 
         for (let hour = 7; hour <= 22; hour++) {
           result[hour] = {};
@@ -611,12 +609,12 @@ export default {
           });
         }
 
-        // сохраняем отдельно используемые дни и помещения для шаблона
         this.scheduleDays = usedDays;
         this.scheduleRooms = usedRooms;
 
         this.scheduleData = result;
       }
+
 
 
 
@@ -994,5 +992,4 @@ button:hover {
 .head-separator {
   border-bottom: 2px solid #a0a0a0;
 }
-
 </style>
