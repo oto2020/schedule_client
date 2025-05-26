@@ -93,13 +93,8 @@
           style="width: 60px; margin-right:4px;">%</div>
       <button @click="generatePDF()">Гнерировать PDF A4 альбом с заданным отступом справа под наши уникальные
         неформальные рамки с отступом {{ paddingRightPercent }}%</button>
-    </div>
-
-    <div name="Печатаемый контент" id="printingContent" v-if="fontSizeVW">
-      <div id="contentCenter">
 
         <div class="w-100 fs-4 d-flex pl-4 mt-4">
-
           <button type="button" class="btn btn-outline-secondary"
             @click="weekNumberDecrementButtonClick"><font-awesome-icon :icon="['fas', 'fa-chevron-left']" /></button>
           <div class="mx-2">{{ computedStartDate }} — {{ computedEndDate }}</div>
@@ -108,37 +103,31 @@
           <div name="Перечисление выбранных помещений" class="ml-2" style="margin-left: 10px;">
             {{ this.computedAllowedRoomTitles.join(', ') }}
           </div>
-
           <div class="ms-auto">
-
-            <!-- <button class="btn me-1" >
-            <div v-if="fullScreenMode" class="full-screen-button" @click="toggleFullScreen(false)"> 
-              <font-awesome-icon :icon="['fas', 'fa-compress']" />
-            </div>
-            <div v-else class="full-screen-button"> 
-              <font-awesome-icon :icon="['fas', 'fa-expand']" />
-            </div>
-          </button> -->
-
-            <button class="btn" @click="toggleFullScreen(true)">
+            <button class="btn">
               <img v-if="schedule" class="g1logo" :src="require('@/g1logo.png')" alt="Пример изображения">
               <div v-else class="mr-1"><font-awesome-icon icon="spinner" size="lg" spin /></div>
             </button>
           </div>
-
         </div>
 
+
+    </div>
+
+    <div name="Печатаемый контент" id="printingContent" v-if="fontSizeVW">
+      <div id="contentCenter">
         <!-- Таблица для режима l -->
-        <table v-if="computedModeValue === 'l'" class="table table-bordered line-height-1-2 mb-4"
+        <table v-if="computedModeValue === 'Три дня недели'" class="table table-bordered line-height-1-2 mb-4"
           style="table-layout: fixed; width: 100%;">
 
           <thead class="head-separator">
             <!-- Первая строка: дни недели -->
             <tr>
-              <th rowspan="2" class="clock-column-style">
+              <th rowspan="2" class="clock-column-style" @click="toggleFullScreen(true)">
                 <font-awesome-icon :icon="['fas', 'clock']" size="sm" />
               </th>
-              <th v-for="day in scheduleDays" :key="day" :colspan="scheduleRooms.length" class="text-center">
+              <th v-for="day in scheduleDays" :key="day" :colspan="scheduleRooms.length"
+                class="text-center weekday-header">
                 {{ day }}
               </th>
             </tr>
@@ -146,7 +135,7 @@
             <tr>
               <template v-for="day in scheduleDays" :key="day">
                 <th v-for="(room, roomIndex) in scheduleRooms" :key="room" class="col-md-1 text-center " :class="[
-                  'col-md-1', 'text-center',
+                  'col-md-1', 'text-center', 'room-header',
                   (roomIndex === scheduleRooms.length - 1) ? 'day-separator' : '',
                   'day-group-bg-' + (scheduleDays.indexOf(day) % 2)
                 ]">
@@ -174,8 +163,9 @@
                           <div class="exercise-title">{{ l.exerciseTitle }}</div>
                           <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
                           <!-- <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div> -->
-                          <div class="room-title">{{ l.roomTitle }}</div>
+                          <!-- <div class="room-title">{{ l.roomTitle }}</div> -->
                           <!-- <div class="room-title">{{ l.dayOfWeek }}</div> -->
+                           <div>{{ l.date }}</div>
                         </div>
                         <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
                         <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
@@ -191,83 +181,9 @@
         </table>
 
 
-        <!-- Таблица для режима m -->
-        <!-- <table v-if="computedModeValue === 'm'" class="table table-bordered line-height-1-2 mb-4">
-          <thead>
-            <tr>
-              <th class="col-md-1">Часы</th>
-              <th v-for="(day, index) in computedActiveWeekDays" :key="index" class="col-md-1">{{ day }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(hourData, hour) in scheduleData" :key="hour">
-              <td>{{ hour }}</td>
-              <td v-for="(dayData, day) in hourData" :key="day" class="td-container">
-                <div v-if="dayData" class="inner-div">
-                  <div v-for="l in dayData" :key="l">
-                    <div class="lesson-parent m-1" :style="{ border: '1px solid ' + l.backgroundColor }">
-                      <div>
-                        <div class="exercise-title">{{ l.exerciseTitle }}</div>
-                        <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
-                        <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div>
-                        <div class="room-title">{{ l.roomTitle }}</div>
-                        <div class="room-title">{{ l.dayOfWeek }}</div>
-                      </div>
-                      <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
-                      <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
-                        <font-awesome-icon :icon="['fas', 'ruble-sign']" size="sm" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table> -->
-
-        <!-- Таблица для режима s
-        <table v-if="computedModeValue === 's'" class="table table-bordered line-height-1-2 mb-4">
-          <thead>
-            <tr>
-              <th class="col-md-1">Часы</th>
-              <th v-for="(day, index) in computedActiveWeekDays" :key="index" class="col-md-1">{{ day }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(hourData, hour) in scheduleData" :key="hour">
-              <td v-for="(dayData, day) in hourData" :key="day" class="td-container">
-                <div v-if="dayData" class="inner-div">
-                  <div v-for="l in dayData" :key="l">
-                    <div class="lesson-parent m-1" :style="{ border: '1px solid ' + l.backgroundColor }">
-                      <div>
-                        <div class="exercise-title">{{ l.exerciseTitle }}</div>
-                        <div class="trainer-name text-truncate d-inline-block">{{ l.trainerName }}</div>
-                        <div class="start-end-time">{{ l.startTime }} - {{ l.endTime }}</div>
-                        <div class="room-title">{{ l.roomTitle }}</div>
-                        <div class="room-title">{{ l.dayOfWeek }}</div>
-                      </div>
-                      <span class="lesson-color" :style="{ background: l.backgroundColor }"></span>
-                      <div v-if="l.exerciseTitle.includes('₽')" class="ruble-icon">
-                        <font-awesome-icon :icon="['fas', 'ruble-sign']" size="sm" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table> -->
-
-
-
-
-
       </div>
       <div id="contentRight"></div>
     </div>
-
-
-
 
   </div>
 </template>
@@ -284,6 +200,9 @@ export default {
 
   data() {
     return {
+      excerciseTitleFontSize: '20pt',
+      weekdayHeaderFontSize: '20pt',
+      roomHeaderTitleFontSize: '20pt',
       fontSizeVW: '100%', // размер текста в зависимости от ширины страницы
       paddingRightPercent: 6.4, // ширина отступа справа
       fullScreenMode: false,
@@ -302,8 +221,8 @@ export default {
         { title: 'Бесплатные', val: 'non-commercial', isActive: false, icon: 'fa-gift' },
       ],
       modes: [
-        { title: 'Все часы', val: 'l', isActive: true, icon: 'expand' },
-        { title: 'Минимум', val: 'm', isActive: false, icon: 'compress' },
+        { title: 'Три дня недели', val: 'Три дня недели', isActive: true, icon: 'expand' },
+        // { title: 'Минимум', val: 'm', isActive: false, icon: 'compress' },
         // { title: 'Минимум', val: 's', isActive: false, icon: 'compress-arrows-alt' },
       ],
 
@@ -431,27 +350,7 @@ export default {
     computedWeekPartValue() {
       return this.weekParts.find((wp) => wp.isActive).val;
     },
-    computedActiveWeekDays() {
-      // Получим список уникальных номеров дней недели, у которых есть занятия
-      const activeDays = new Set();
 
-      Object.values(this.scheduleData).forEach(hourRow => {
-        if (hourRow && typeof hourRow === 'object') {
-          Object.entries(hourRow).forEach(([, lessons]) => {
-            if (lessons && lessons.length > 0) {
-              lessons.forEach(lesson => {
-                if (lesson.dayOfWeekNumber !== undefined) {
-                  activeDays.add(lesson.dayOfWeekNumber);
-                }
-              });
-            }
-          });
-        }
-      });
-
-      // Преобразуем номера дней обратно в имена из weekDays
-      return this.weekDays.filter((_, index) => activeDays.has(index));
-    }
   },
   methods: {
     toggleFullScreen() {
@@ -574,7 +473,7 @@ export default {
 
       // обнуляем данные таблицы
       this.scheduleData = [];
-      if (this.computedModeValue === 'l') {
+      if (this.computedModeValue === 'Три дня недели') {
         let result = {};
 
         const allowedDayNumbers = this.computedWeekPartValue
@@ -740,7 +639,11 @@ export default {
 
     // генерирование ПДФ-файла
     async generatePDF() {
-      // this.fontSizeVW = '2rem';
+      // перед печатью ставим 40pt
+      this.excerciseTitleFontSize = '25pt';
+      this.weekdayHeaderFontSize = '25pt';
+      this.roomHeaderTitleFontSize = '25pt';
+
       // this.$forceUpdate();
       const printingContent = document.getElementById('printingContent');
       const contentCenter = document.getElementById('contentCenter');
@@ -787,7 +690,11 @@ export default {
       contentCenter.style.width = oldWidthPrintingContent + 'px';
       contentRight.style.width = '0 px';
 
-      // this.fontSizeVW = '1rem';
+      
+      // после печати ставим 20pt
+      this.excerciseTitleFontSize = '20pt';
+      this.weekdayHeaderFontSize = '20pt';
+      this.roomHeaderTitleFontSize = '20pt';
     },
 
     // получает несгруппированный массив расписания и записывает его в this.schedule
@@ -912,15 +819,25 @@ button:hover {
   font-size: v-bind(fontSizeVW);
 }
 
+.weekday-header {
+  font-size: v-bind(weekdayHeaderFontSize);
+  font-weight: bold;
+}
+
+.room-header {
+  font-size: v-bind(roomHeaderTitleFontSize);
+  text-align: center;
+}
 
 .exercise-title {
-  font-size: 125%;
+  font-size: v-bind(excerciseTitleFontSize);
   text-align: left;
   margin-left: 6px;
   font-weight: bold;
 }
 
 .trainer-name {
+  font-size: 15pt;
   width: 100%;
   text-align: left;
   margin-left: 6px;
@@ -937,6 +854,8 @@ button:hover {
   text-align: left;
   margin-left: 6px;
 }
+
+
 
 .td-container {
   padding: 0;
